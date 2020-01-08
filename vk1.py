@@ -20,21 +20,43 @@ print('?'.join(
 ))
 
 TOKEN = '3973af83b992c181f8a15f95d4da5667565be5754326f5188193d3f9965c381e03d39ed08dd21277f9ba6'
-user_id = input('Введите id пользователя: ')
+user = input('Введите id или короткое имя (screen_name) пользователя: ')
+
 
 params_1 = {
+    'access_token': TOKEN,
+    'v': '5.103',
+    'user_ids': user,
+}
+
+response_1 = requests.get(
+    'https://api.vk.com/method/users.get',
+    params_1
+)
+# pprint(response_1.json())
+rezult_user = response_1.json()
+# pprint(rezult_user)
+for user in rezult_user['response']:
+    user_id = user['id']
+    # print(user_id)
+
+
+
+params_2 = {
     'access_token': TOKEN,
     'v': '5.103',
     'user_id': user_id,
     'extended': 1,
     'fields': 'members_count'
 }
-response_1 = requests.get(
+
+
+response_2 = requests.get(
     'https://api.vk.com/method/groups.get',
-    params_1
+    params_2
 )
-# pprint(response_1.json())
-rezult_groups = response_1.json()
+# pprint(response_11.json())
+rezult_groups = response_2.json()
 # pprint(rezult_groups)
 
 groups_list = []
@@ -42,6 +64,7 @@ for number_id in rezult_groups['response']['items']:
     id_1 = number_id['id']
     groups_list.append(id_1)
     # print(id_1)
+
 
 
 for id_groups in groups_list:
@@ -57,13 +80,18 @@ for id_groups in groups_list:
         )
 
     rezult_groups_frends = response_3.json()
+    # print(rezult_groups_frends)
 
     groups_frends_dict = {}
-    for key, value in rezult_groups_frends['response'].items():
-        if value == 0:
-            rez_dict = dict({'id_group': id_groups})
-            groups_frends_dict.update(rez_dict)
+    try:
+        for key, value in rezult_groups_frends['response'].items():
+            if value == 0:
+                rez_dict = dict({'id_group': id_groups})
+                groups_frends_dict.update(rez_dict)
+                time.sleep(0.5)
             # print(groups_frends_dict)
+    except Exception as e:
+        break
 
 
     for group_id in groups_frends_dict.values():
