@@ -28,18 +28,13 @@ params_1 = {
     'v': '5.103',
     'user_ids': user,
 }
-
 response_1 = requests.get(
     'https://api.vk.com/method/users.get',
     params_1
 )
-# pprint(response_1.json())
 rezult_user = response_1.json()
-# pprint(rezult_user)
 for user in rezult_user['response']:
     user_id = user['id']
-    # print(user_id)
-
 
 
 params_2 = {
@@ -49,22 +44,16 @@ params_2 = {
     'extended': 1,
     'fields': 'members_count'
 }
-
-
 response_2 = requests.get(
     'https://api.vk.com/method/groups.get',
     params_2
 )
-# pprint(response_11.json())
 rezult_groups = response_2.json()
-# pprint(rezult_groups)
-
 groups_list = []
 for number_id in rezult_groups['response']['items']:
     id_1 = number_id['id']
     groups_list.append(id_1)
-    # print(id_1)
-
+    print(f'Обрабатывается  {len(groups_list)}  группа')
 
 
 for id_groups in groups_list:
@@ -74,24 +63,23 @@ for id_groups in groups_list:
         'group_id': id_groups,
         'filter': 'friends'
     }
-    response_3 = requests.get(
-        'https://api.vk.com/method/groups.getMembers',
-        params_3
-        )
-
-    rezult_groups_frends = response_3.json()
-    # print(rezult_groups_frends)
-
-    groups_frends_dict = {}
     try:
-        for key, value in rezult_groups_frends['response'].items():
-            if value == 0:
-                rez_dict = dict({'id_group': id_groups})
-                groups_frends_dict.update(rez_dict)
-                time.sleep(0.5)
-            # print(groups_frends_dict)
-    except Exception as e:
-        break
+        response_3 = requests.get(
+            'https://api.vk.com/method/groups.getMembers',
+            params_3
+            )
+        rezult_groups_frends = response_3.json()
+        groups_frends_dict = {}
+        try:
+            for key, value in rezult_groups_frends['response'].items():
+                if value == 0:
+                    rez_dict = dict({'id_group': id_groups})
+                    groups_frends_dict.update(rez_dict)
+                    time.sleep(0.5)
+        except Exception as e:
+            break
+    except Exception:
+        print(f'Ошибка!!! Access denied: no access to this group - Сообщество с id {id_groups} заблокировано')
 
 
     for group_id in groups_frends_dict.values():
@@ -106,7 +94,6 @@ for id_groups in groups_list:
         params_4
             )
         all_rezult = response_4.json()
-        # pprint(all_rezult)
 
         groups_frends_list = []
         for block in all_rezult['response']:
@@ -116,6 +103,3 @@ for id_groups in groups_list:
             dict_block = dict({'name': name_block, 'gid': id_block, 'members_count': members_count_block})
             groups_frends_list.append(dict_block)
             pprint(groups_frends_list)
-
-
-
