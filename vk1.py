@@ -1,5 +1,6 @@
 import requests
 import time
+import json
 
 from time import sleep
 from pprint import pprint
@@ -53,9 +54,9 @@ groups_list = []
 for number_id in rezult_groups['response']['items']:
     id_1 = number_id['id']
     groups_list.append(id_1)
-    print(f'Обрабатывается  {len(groups_list)}  группа')
+    # print(f'Обрабатывается  {len(groups_list)}  группа')
 
-
+groups_friends_list = []
 for id_groups in groups_list:
     params_3 = {
         'access_token': TOKEN,
@@ -63,18 +64,21 @@ for id_groups in groups_list:
         'group_id': id_groups,
         'filter': 'friends'
     }
+
+    print(f'У пользователя всего {len(groups_list)} групп. Идет обработка очередной группы. Ждите')
+
     try:
         response_3 = requests.get(
             'https://api.vk.com/method/groups.getMembers',
             params_3
             )
-        rezult_groups_frends = response_3.json()
-        groups_frends_dict = {}
+        rezult_groups_friends = response_3.json()
+        groups_friends_dict = {}
         try:
-            for key, value in rezult_groups_frends['response'].items():
+            for key, value in rezult_groups_friends['response'].items():
                 if value == 0:
                     rez_dict = dict({'id_group': id_groups})
-                    groups_frends_dict.update(rez_dict)
+                    groups_friends_dict.update(rez_dict)
                     time.sleep(0.5)
         except Exception as e:
             break
@@ -82,7 +86,7 @@ for id_groups in groups_list:
         print(f'Ошибка!!! Access denied: no access to this group - Сообщество с id {id_groups} заблокировано')
 
 
-    for group_id in groups_frends_dict.values():
+    for group_id in groups_friends_dict.values():
         params_4 = {
             'access_token': TOKEN,
             'v': '5.103',
@@ -95,11 +99,19 @@ for id_groups in groups_list:
             )
         all_rezult = response_4.json()
 
-        groups_frends_list = []
+        # groups_friends_list = []
         for block in all_rezult['response']:
             id_block = block['id']
             name_block = block['name']
             members_count_block = block['members_count']
             dict_block = dict({'name': name_block, 'gid': id_block, 'members_count': members_count_block})
-            groups_frends_list.append(dict_block)
-            pprint(groups_frends_list)
+            groups_friends_list.append(dict_block)
+# pprint(groups_friends_list)
+
+
+with open('rezult.py', 'w', encoding='utf-8') as file:
+    json.dump(groups_friends_list, file, ensure_ascii=False, indent=2)
+print('Обработка завершена')
+
+
+
